@@ -1,24 +1,25 @@
-package com.example.yournews
+package com.example.yournews.ui.view
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.yournews.adapter.NewsListAdapter
+import com.example.yournews.R
+import com.example.yournews.data.model.News
 import com.example.yournews.databinding.ActivityMainBinding
-import com.example.yournews.model.News
-import com.example.yournews.networking.APIClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.yournews.ui.adapter.NewsListAdapter
+import com.example.yournews.ui.viewmodel.NewsViewModel
 
-class MainActivity : AppCompatActivity(), NewsListAdapter.NewsItemClicked {
+class MainActivity : AppCompatActivity(), NewsListAdapter.NewsItemClicked,
+    NewsListAdapter.ShareButtonClicked {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mAdapter: NewsListAdapter
+    private val newsViewModel: NewsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,23 +27,13 @@ class MainActivity : AppCompatActivity(), NewsListAdapter.NewsItemClicked {
         setContentView(binding.root)
 
         binding.rvNews.layoutManager = LinearLayoutManager(this)
-        fetchData()
-        mAdapter = NewsListAdapter(this)
+        mAdapter = NewsListAdapter(this, this)
         binding.rvNews.adapter = mAdapter
-    }
 
-    private fun fetchData() {
-        GlobalScope.launch(Dispatchers.Main) {
-            val response = withContext(Dispatchers.IO) {
-                APIClient.api.getNews()
-            }
+        newsViewModel.getNewsLiveData().observe(this, {
+            mAdapter.updateNews(it)
+        })
 
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    mAdapter.updateNews(it.articles)
-                }
-            }
-        }
     }
 
     override fun onItemClicked(item: News) {
@@ -55,5 +46,14 @@ class MainActivity : AppCompatActivity(), NewsListAdapter.NewsItemClicked {
         builder.setDefaultColorSchemeParams(defaultColors);
         val customTabsIntent = builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
+
+    override fun onItemClicked(url: String) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, "Checkout this latest news $url")
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(sendIntent, null))
     }
 }

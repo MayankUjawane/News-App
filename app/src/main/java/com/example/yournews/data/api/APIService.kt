@@ -1,6 +1,6 @@
-package com.example.yournews.networking
+package com.example.yournews.data.api
 
-import com.example.yournews.model.NewsData
+import com.example.yournews.data.model.NewsData
 import retrofit2.Response
 import retrofit2.http.GET
 
