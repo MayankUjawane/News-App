@@ -28,8 +28,8 @@ class NewsViewModel : ViewModel() {
                 APIClient.api.getNews()
             }
             if (response.isSuccessful) {
-                response.body()?.let {
-                    it.articles?.let { newsLiveData.postValue(it) }
+                response.body()?.let { newsData ->
+                    newsData.articles?.let { newsLiveData.postValue(it) }
                 }
             }
         }

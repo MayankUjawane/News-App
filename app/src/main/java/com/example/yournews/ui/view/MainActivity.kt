@@ -37,15 +37,14 @@ class MainActivity : AppCompatActivity(), NewsListAdapter.NewsItemClicked,
     }
 
     override fun onItemClicked(item: News) {
-        val url = item.url
-        val builder = CustomTabsIntent.Builder();
+        val builder = CustomTabsIntent.Builder()
         val colorInt = ContextCompat.getColor(this, R.color.purple_500)
         val defaultColors = CustomTabColorSchemeParams.Builder()
             .setToolbarColor(colorInt)
-            .build();
-        builder.setDefaultColorSchemeParams(defaultColors);
-        val customTabsIntent = builder.build();
-        customTabsIntent.launchUrl(this, Uri.parse(url));
+            .build()
+        builder.setDefaultColorSchemeParams(defaultColors)
+        val customTabsIntent = builder.build()
+        customTabsIntent.launchUrl(this, Uri.parse(item.url))
     }
 
     override fun onItemClicked(url: String) {
